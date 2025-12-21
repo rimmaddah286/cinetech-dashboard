@@ -208,3 +208,137 @@ afficherFilms(films);
     document.getElementById("totalRealisateurs").textContent = totalRealisateurs;
     document.getElementById("nouveauxFilms").textContent = nouveauxFilms;
  }
+
+ let realisateurs = [];
+function updateKPI() {
+    const span = document.getElementById("kpiRealisateurs");
+    if (!span) {
+        console.error("Span KPI introuvable");
+        return;
+    }
+    span.textContent = realisateurs.length;
+}
+
+function addRealisateur(e) {
+    e.preventDefault();
+
+    const input = document.getElementById("nomRealisateur");
+    const nom = input.value.trim();
+    if (!nom) return;
+
+    realisateurs.push(nom);
+    input.value = "";
+
+    afficherRealisateurs();
+    updateKPI();
+}
+updateKPI();
+
+function afficherRealisateurs() {
+    const ul = document.getElementById("listeRealisateurs");
+    ul.innerHTML = "";
+
+    realisateurs.forEach((nom, index) => {
+        const li = document.createElement("li");
+        li.textContent = nom;
+
+        const btn = document.createElement("button");
+        btn.textContent = "Supprimer";
+        btn.classList.add("btn-supprimer");
+
+        btn.addEventListener("click", () => {
+            realisateurs.splice(index, 1);
+            afficherRealisateurs();
+        });
+
+        li.appendChild(btn);
+        ul.appendChild(li);
+    });
+}
+
+
+
+
+
+
+
+let ratingChart = null;
+
+function fetchOMDBStats() {
+    const title = document.getElementById("omdbTitle").value.trim();
+    if (!title) {
+        alert("Entrez un titre de film");
+        return;
+    }
+
+    fetch(https://www.omdbapi.com/?t=${title}&apikey=6edec412)
+        .then(res => res.json())
+        .then(data => {
+            if (data.Response === "False") {
+                alert("Film introuvable sur IMDb");
+                clearChart();
+                return;
+            }
+
+            afficherFilm(data);
+            drawRatingChart(data);
+        })
+        .catch(() => {
+            alert("Erreur API OMDB");
+        });
+}
+
+function afficherFilm(data) {
+    document.getElementById("filmDetails").innerHTML = `
+        <h2>${data.Title} (${data.Year})</h2>
+        <img src="${data.Poster}" width="200">
+        <p><strong>Genre :</strong> ${data.Genre}</p>
+        <p><strong>Réalisateur :</strong> ${data.Director}</p>
+        <p><strong>Acteurs :</strong> ${data.Actors}</p>
+        <p><strong>Résumé :</strong> ${data.Plot}</p>
+        <p><strong>Note IMDb :</strong>  ${data.imdbRating}</p>
+    `;
+}
+
+
+
+function drawRatingChart(data) {
+    const ctx = document.getElementById("ratingChart");
+
+    if (ratingChart) {
+        ratingChart.destroy();
+    }
+
+    ratingChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: [data.Title],
+            datasets: [{
+                label: "Note IMDb",
+                data: [parseFloat(data.imdbRating)],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: "Note IMDb"
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 10
+                }
+            }
+        }
+    });
+} 
+function clearChart() {
+    if (ratingChart) {
+        ratingChart.destroy();
+        ratingChart = null;
+    }
+}
