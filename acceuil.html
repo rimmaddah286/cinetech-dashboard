@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTech</title>
+    <link rel="stylesheet" href="acceuil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <h4 class="logo">CineTech</h4>
+    <div class="recherche">
+        <input type="text" placeholder="Rechercher...">
+        <button><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+</header>
+
+<div class="sidebar"> 
+    <ul>
+        <li onclick="showSection('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</li> 
+        <li onclick="showSection('module1')"><i class="fa-solid fa-film"></i> Module 1</li>
+        <li onclick="showSection('module2')"><i class="fa-solid fa-tv"></i> Module 2</li> 
+        <li onclick="showSection('stats')"><i class="fa-solid fa-users"></i> Statistiques</li> 
+    </ul>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section">
+
+    <div class="row">
+        <div class="box">
+            <div class="kpi">
+                <div class="kpi-icon"><i class="fa-solid fa-film"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="totalFilms">0</span>
+                    <span class="kpi-label">Total Films</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="kpi">
+                <div class="kpi-icon"><i class="fa-solid fa-star"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="noteMoyenne">0</span>
+                    <span class="kpi-label">Note Moyenne</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="kpi">
+                <div class="kpi-icon"><i class="fa-solid fa-user"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="totalRealisateurs">0</span>
+                    <span class="kpi-label">Réalisateurs</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="kpi">
+                <div class="kpi-icon"><i class="fa-solid fa-calendar"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="nouveauxFilms">0</span>
+                    <span class="kpi-label">Nouveaux films</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row chart-row">
+        <div class="box chart-box">
+            <p>Graphique des films</p>
+            <hr>
+            <canvas id="filmsChart"></canvas>
+        </div>
+
+        <div class="box chart-box">
+            <p>Top 10 movies</p>
+            <i class="fa-solid fa-angle-left"></i>
+            <i class="fa-solid fa-angle-right"></i>
+            <hr>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODULE 1 -->
+<div id="module1" class="section">
+
+    <div class="container">
+
+        <div class="pageheader">
+            <h1>Gestion des Films</h1>
+            <button class="btn-primary">+ Ajouter un film</button>
+        </div>
+
+        <h2>Ajouter / Modifier un Film</h2>
+
+        <form class="filmform" id="filmForm">
+            <div class="formgroup">
+                <label for="titre">Titre</label>
+                <input type="text" id="titre" required>
+            </div>
+
+            <div class="formgroup">
+                <label for="genre">Genre</label>
+                <input type="text" id="genre" required>
+            </div>
+
+            <div class="formgroup">
+                <label for="annee">Année</label>
+                <input type="number" id="annee" required>
+            </div>
+
+            <div class="formgroup">
+                <label for="note">Note</label>
+                <input type="number" step="0.1" id="note" required>
+            </div>
+
+            <div class="formgroup">
+                <label for="realisateur">Réalisateur</label>
+                <input type="text" id="realisateur" required>
+            </div>
+
+            <div class="formactions">
+                <button type="submit" class="btn-save">Ajouter</button>
+            </div>
+        </form>
+
+        <div class="tools">
+            <input type="text" id="searchInput" placeholder="Rechercher un film...">
+            <button id="btnSearch">Rechercher</button>
+
+            <select id="sortSelect">
+                <option value="">Trier par</option>
+                <option value="titre">Titre</option>
+                <option value="annee">Année</option>
+                <option value="note">Note</option>
+            </select>
+
+            <button id="resetStorage">Réinitialiser</button>
+        </div>
+
+        <h2>Liste des Films</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Genre</th>
+                    <th>Année</th>
+                    <th>Note</th>
+                    <th>Réalisateur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="filmsTable"></tbody>
+        </table>
+
+    </div>
+
+</div>
+
+<!-- MODULE 2 -->
+<div id="module2" class="section">
+    <h2>Module 2</h2>
+    <p>Liste des séries...</p>
+</div>
+
+<!-- STATS -->
+<div id="stats" class="section">
+    <h2>Statistiques</h2>
+    <p>Liste des utilisateurs...</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="acceuil.js"></script>
+</body>
+</html>
