@@ -1,267 +1,236 @@
-function showSection(sectionid)
-{   
-    const sec=document.querySelectorAll('.section');
-    sec.forEach(function(sections)
-             {
-                   sections.style.display='none';
-             });
+/* =========================
+   AFFICHAGE DES SECTIONS
+========================= */
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
 
-    /**affiche la section cliquee */
-    document.getElementById(sectionid).style.display = 'block';
-   
+    sections.forEach(function (section) {
+        section.style.display = 'none';
+    });
+
+    // Affiche la section cliquée
+    document.getElementById(sectionId).style.display = 'block';
 }
 
- /**section affichee au debut par defaut a l exterieur
-  *  pour ne ps avoir une boucle imbriquee */
+// Section affichée par défaut (en dehors de la fonction pour éviter une boucle)
 showSection('dashboard');
 
 
-const ctx = document.getElementById('filmsChart').getContext('2d');
+/* c est un graphique dynamique non pas statique comme le code du site chart.js
+   il reflete les donnees entree par nous */
+let filmsChart = null;/**au debut graph vide */
 
-const filmsChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Action', 'Comedie', 'Horreur', 'Romantique', 'Policier', 'Anime'],
-        datasets: [{
-            label: 'Nombre de films',
-            data: [12, 19, 8, 6, 4 , 25],
-            backgroundColor: ['#4e73df',
-                    '#1cc88a',
-                    '#36b9cc',
-                    'pink',
-                    '#f04c3dff',
-                    'rgba(187, 252, 9, 1)']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+function updateFilmsChart() {
+    const ctx = document.getElementById("filmsChart").getContext("2d");
+
+    // Compter les films par genre
+    const genresCount = {};
+
+    films.forEach(film => {
+        genresCount[film.genre] = (genresCount[film.genre] || 0) + 1;
+    });/** parcourir les films et compter les films par genre */
+
+
+    /**transforme l objet en teb de label et
+     c est le y du graphe */
+    const labels = Object.keys(genresCount);
+    /**recupere les va; et c est le x du graphe */
+    const data = Object.values(genresCount).map(val => parseInt(val));
+
+
+    // Détruire l'ancien graphique
+    if (filmsChart) {
+        filmsChart.destroy();
     }
-});
 
+    // Créer le nouveau graphique
+    filmsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Nombre de films",
+                data: data,
+                backgroundColor: "#e77015ff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+/**top 10  */
+function updateTop10() {
+    const top10Container = document.getElementById("top10List");
+    top10Container.innerHTML = "";
+
+    // Trier les films par note décroissante et prendre les 10 premiers
+    const topFilms = [...films].sort((a, b) => b.note - a.note).slice(0, 10);
+
+    topFilms.forEach(film => {
+        const filmDiv = document.createElement("div");
+
+        filmDiv.innerHTML = `
+            <img src="${film.image || 'https://via.placeholder.com/100x150'}" alt="${film.titre}">
+            <p>${film.titre}</p>
+            <p style="font-size:12px; margin-top:2px;">⭐ ${film.note}</p>
+        `;
+
+        top10Container.appendChild(filmDiv);
+    });
+}
+
+
+
+/* =========================
+   RESET LOCAL STORAGE
+========================= */
 document.getElementById("resetStorage").addEventListener("click", function () {
-  if (confirm("Supprimer tous les films ?")) {
-    localStorage.removeItem("films");
-    films = [];
-    afficherFilms(films);
-  }
-});
-
-// Récupération des éléments
-var filmForm = document.getElementById("filmForm");
-var filmsTable = document.getElementById("filmsTable");
-
-// Charger les films existants
-var films = JSON.parse(localStorage.getItem("films")) || [];
-
-// Afficher les films
-function afficherFilms() {
-  filmsTable.innerHTML = "";
-
-  for (var i = 0; i < films.length; i++) {
-    var film = films[i];
-
-    var row = document.createElement("tr");
-
-    row.innerHTML =
-      "<td>" + film.titre + "</td>" +
-      "<td>" + film.genre + "</td>" +
-      "<td>" + film.annee + "</td>" +
-      "<td>" + film.note + "</td>" +
-      "<td>" + film.realisateur + "</td>" +
-      "<td><button class='btn-delete'>Supprimer</button></td>";
-
-    row.querySelector(".btn-delete")
-      .addEventListener("click", function () {
-        supprimerFilm(film.titre);
-      });
-
-    filmsTable.appendChild(row);
-  }
-}
-
-// Ajouter un film (FORMULAIRE VALIDÉ)
-filmForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  var titre = document.getElementById("titre").value.trim();
-  var genre = document.getElementById("genre").value.trim();
-  var annee = parseInt(document.getElementById("annee").value);
-  var note = parseFloat(document.getElementById("note").value);
-  var realisateur = document.getElementById("realisateur").value.trim();
-
-  // Validation
-  if (!titre || !genre || !annee || !note || !realisateur) {
-    alert("Tous les champs sont obligatoires");
-    return;
-  }
-
-  if (note < 0 || note > 10) {
-    alert("La note doit être comprise entre 0 et 10");
-    return;
-  }
-
-  // Création de l'objet film
-  var film = {
-    titre: titre,
-    genre: genre,
-    annee: annee,
-    note: note,
-    realisateur: realisateur
-  };
-
-  // Ajout au tableau
-  films.push(film);
-  updateKPI();
-
-  // Sauvegarde
-  localStorage.setItem("films", JSON.stringify(films));
-
-  // Affichage immédiat
-  afficherFilms();
-
-  // Réinitialisation du formulaire
-  filmForm.reset();
-});
-var sortSelect = document.getElementById("sortSelect");
-
-sortSelect.addEventListener("change", function () {
-  var critere = sortSelect.value;
-
-  if (critere === "titre") {
-    films.sort(function (a, b) {
-      return a.titre.localeCompare(b.titre);
-    });
-  } 
-  else if (critere === "annee") {
-    films.sort(function (a, b) {
-      return a.annee - b.annee;
-    });
-  } 
-  else if (critere === "note") {
-    films.sort(function (a, b) {
-      return b.note - a.note;
-    });
-  }
-
-  afficherFilms(films);
-});
-var searchInput = document.getElementById("searchInput");
-
-function Recherche() {
-  var valeur = searchInput.value.toLowerCase();
-
-  if (valeur === "") {
-    afficherFilms(films);
-    return;
-  }
-
-  var filmsFiltres = films.filter(function (film) {
-    return film.titre && film.titre.toLowerCase().includes(valeur);
-  });
-
-  afficherFilms(filmsFiltres);
-}
-function supprimerFilm(titre) {
-  if (!confirm("Voulez-vous vraiment supprimer ce film ?")) return;
-
-  films = films.filter(film => film.titre !== titre);
-  localStorage.setItem("films", JSON.stringify(films));
-  afficherFilms();
-  updateKPI();  
-}
-   
-afficherFilms(films);
-
-
-/* fct KPI */
- function updateKPI ()
- {  /*kpi total film */
-    const totalFilms =films.length ;
-    /* kpi myenne */
-    let moyenne=0;
-    if (films.length >0)
-    {
-        const somme = films.reduce(    
-            function additionNotes(total, film) 
-                     {
-                          return total + film.note;
-                      }, 0);/* la fct additionNote est le callback de reduce
-                             le 0 est la valeur init de total */
-        moyenne = somme / films.length.toFixed(1); /* cad un chiffre apres la virgule */
-
+    if (confirm("Supprimer tous les films ?")) {
+        localStorage.removeItem("films");
+        films = [];
+        afficherFilms();
+        modifierKPI();
     }
-    /*kpi realisateur */
+});
+
+
+/* =========================
+   GESTION DES FILMS
+========================= */
+const filmForm = document.getElementById("filmForm");
+const filmsTable = document.getElementById("filmsTable");
+
+// Chargement des films depuis le localStorage
+let films = JSON.parse(localStorage.getItem("films")) || [];
+
+// Affichage des films
+function afficherFilms() {
+    filmsTable.innerHTML = "";
+
+    films.forEach(function (film) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td><img src="${film.image || 'https://via.placeholder.com/50x75'}" width="50"></td>
+            <td>${film.titre}</td>
+            <td>${film.genre}</td>
+            <td>${film.annee}</td>
+            <td>${film.note}</td>
+            <td>${film.realisateur}</td>
+            <td><button class="btn-delete">Supprimer</button></td>
+        `;
+
+        row.querySelector(".btn-delete").addEventListener("click", function () {
+            supprimerFilm(film.titre);
+        });
+
+        filmsTable.appendChild(row);
+    });
+}
+
+// Ajout d’un film
+filmForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    
+    const genre = document.getElementById("genre").value.trim();
+    const annee = parseInt(document.getElementById("annee").value);
+    const note = parseFloat(document.getElementById("note").value);
+    const realisateur = document.getElementById("realisateur").value.trim();
+
+   if (! titre || !genre || !annee || isNaN(note) || !realisateur) {
+        alert("Tous les champs sont obligatoires");
+        return;
+    }
+
+    if (note < 0 || note > 10) {
+        alert("La note doit être comprise entre 0 et 10");
+        return;
+    }
+    
+    let image = document.getElementById("image") 
+        ? document.getElementById("image").value.trim() 
+        : "https://via.placeholder.com/100x150";
+
+
+    fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(titre)}&apikey=6edec412`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.Response !== "False" && data.Poster) {
+                image = data.Poster;
+            }
+
+            // Ajouter le film seulement après avoir récupéré l'image
+            films.push({ titre, genre, annee, note, realisateur, image });
+            localStorage.setItem("films", JSON.stringify(films));
+            afficherFilms();
+            updateFilmsChart();
+            updateTop10();
+            modifierKPI();
+            filmForm.reset();
+        })
+        .catch(err => {
+            console.log(err);
+            // Ajouter film avec image par défaut si erreur API
+            films.push({ titre, genre, annee, note, realisateur, image });
+            localStorage.setItem("films", JSON.stringify(films));
+            afficherFilms();
+            updateFilmsChart();
+            updateTop10();
+            modifierKPI();
+            filmForm.reset();
+        });
+});
+
+
+/* =========================
+   SUPPRESSION D’UN FILM
+========================= */
+function supprimerFilm(titre) {
+    if (!confirm("Voulez-vous vraiment supprimer ce film ?")) return;
+
+    films = films.filter(film => film.titre !== titre);
+    localStorage.setItem("films", JSON.stringify(films));
+    afficherFilms();
+    modifierKPI();
+    updateTop10();
+}
+
+afficherFilms();
+modifierKPI();
+updateFilmsChart();
+
+
+/* =========================
+   KPI
+========================= */
+function modifierKPI() {
+    const totalFilms = films.length;
+
+    let moyenne = 0;
+    if (films.length > 0) {
+        const somme = films.reduce((total, film) => total + film.note, 0);
+        moyenne = (somme / films.length).toFixed(1);
+    }
+
     const realisateurs = [...new Set(films.map(f => f.realisateur))];
     const totalRealisateurs = realisateurs.length;
 
-    /* kpi nv films */
-    const anneeActuelle = new Date().getFullYear(); /* new date on acree un objet qui va nous donnez
-                                                     la date et l heure mais on va prendre justa la 
-                                                     date grace a getFullYear */
+    const anneeActuelle = new Date().getFullYear();
     const nouveauxFilms = films.filter(f => f.annee === anneeActuelle).length;
 
-    /*Mettre à jour le HTML avec les valeurs calculées */
-    /* le textcontent remplace la valeur de span par de la fct kpi*/
     document.getElementById("totalFilms").textContent = totalFilms;
     document.getElementById("noteMoyenne").textContent = moyenne;
     document.getElementById("totalRealisateurs").textContent = totalRealisateurs;
     document.getElementById("nouveauxFilms").textContent = nouveauxFilms;
- }
-
- let realisateurs = [];
-function updateKPI() {
-    const span = document.getElementById("kpiRealisateurs");
-    if (!span) {
-        console.error("Span KPI introuvable");
-        return;
-    }
-    span.textContent = realisateurs.length;
-}
-
-function addRealisateur(e) {
-    e.preventDefault();
-
-    const input = document.getElementById("nomRealisateur");
-    const nom = input.value.trim();
-    if (!nom) return;
-
-    realisateurs.push(nom);
-    input.value = "";
-
-    afficherRealisateurs();
-    updateKPI();
-}
-updateKPI();
-
-function afficherRealisateurs() {
-    const ul = document.getElementById("listeRealisateurs");
-    ul.innerHTML = "";
-
-    realisateurs.forEach((nom, index) => {
-        const li = document.createElement("li");
-        li.textContent = nom;
-
-        const btn = document.createElement("button");
-        btn.textContent = "Supprimer";
-        btn.classList.add("btn-supprimer");
-
-        btn.addEventListener("click", () => {
-            realisateurs.splice(index, 1);
-            afficherRealisateurs();
-        });
-
-        li.appendChild(btn);
-        ul.appendChild(li);
-    });
 }
 
 
-
-
-
-
-
+/* =========================
+   API OMDB
+========================= */
 let ratingChart = null;
 
 function fetchOMDBStats() {
@@ -271,7 +240,7 @@ function fetchOMDBStats() {
         return;
     }
 
-    fetch(https://www.omdbapi.com/?t=${title}&apikey=6edec412)
+    fetch(`https://www.omdbapi.com/?t=${title}&apikey=6edec412`)
         .then(res => res.json())
         .then(data => {
             if (data.Response === "False") {
@@ -279,13 +248,10 @@ function fetchOMDBStats() {
                 clearChart();
                 return;
             }
-
             afficherFilm(data);
             drawRatingChart(data);
         })
-        .catch(() => {
-            alert("Erreur API OMDB");
-        });
+        .catch(() => alert("Erreur API OMDB"));
 }
 
 function afficherFilm(data) {
@@ -296,18 +262,15 @@ function afficherFilm(data) {
         <p><strong>Réalisateur :</strong> ${data.Director}</p>
         <p><strong>Acteurs :</strong> ${data.Actors}</p>
         <p><strong>Résumé :</strong> ${data.Plot}</p>
-        <p><strong>Note IMDb :</strong>  ${data.imdbRating}</p>
+        <p><strong>Note IMDb :</strong> ${data.imdbRating}</p>
     `;
 }
-
-
+updateTop10();
 
 function drawRatingChart(data) {
     const ctx = document.getElementById("ratingChart");
 
-    if (ratingChart) {
-        ratingChart.destroy();
-    }
+    if (ratingChart) ratingChart.destroy();
 
     ratingChart = new Chart(ctx, {
         type: "bar",
@@ -315,30 +278,28 @@ function drawRatingChart(data) {
             labels: [data.Title],
             datasets: [{
                 label: "Note IMDb",
-                data: [parseFloat(data.imdbRating)],
+                data: [parseFloat(data.imdbRating)]
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: "Note IMDb"
-                }
-            },
             scales: {
-                y: {
-                    min: 0,
-                    max: 10
-                }
+                y: { min: 0, max: 10 }
             }
         }
     });
-} 
+}
+
 function clearChart() {
     if (ratingChart) {
         ratingChart.destroy();
         ratingChart = null;
     }
 }
+
+
+
+
+
+
+updateFilmsChart();

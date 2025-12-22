@@ -83,6 +83,7 @@
             <i class="fa-solid fa-angle-left"></i>
             <i class="fa-solid fa-angle-right"></i>
             <hr>
+            <div id="top10List" class="top10-list"></div>
         </div>
     </div>
 
@@ -92,7 +93,7 @@
 <div id="module1" class="section">
 
     <div class="container">
-
+        
         <div class="pageheader">
             <h1>Gestion des Films</h1>
             <button class="btn-primary">+ Ajouter un film</button>
@@ -101,6 +102,11 @@
         <h2>Ajouter / Modifier un Film</h2>
 
         <form class="filmform" id="filmForm">
+            <div class="formgroup">
+                   <label for="image">Image (URL)</label>
+                 <input type="text" id="image" placeholder="Lien image du film">
+              </div>
+
             <div class="formgroup">
                 <label for="titre">Titre</label>
                 <input type="text" id="titre" required>
@@ -150,6 +156,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>Titre</th>
                     <th>Genre</th>
                     <th>Année</th>
@@ -203,7 +210,7 @@
 
 
 
-    
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="acceuil.js"></script>
 </body>
 </html>
