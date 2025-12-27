@@ -51,7 +51,7 @@ function updateFilmsChart() {
             datasets: [{
                 label: "Nombre de films",
                 data: data,
-                backgroundColor: "#e77015ff"
+                backgroundColor: "pink"
             }]
         },
         options: {
@@ -70,15 +70,16 @@ function updateTop10() {
     const topFilms = [...films].sort((a, b) => b.note - a.note).slice(0, 10);
 
     topFilms.forEach(film => {
-        const filmDiv = document.createElement("div");
+        const div = document.createElement("div");
+        div.classList.add("top-film");
 
-        filmDiv.innerHTML = `
-            <img src="${film.image || 'https://via.placeholder.com/100x150'}" alt="${film.titre}">
+        div.innerHTML = `
+           <img src="${film.image}" alt="${film.titre}" width="100">
             <p>${film.titre}</p>
             <p style="font-size:12px; margin-top:2px;">⭐ ${film.note}</p>
         `;
 
-        top10Container.appendChild(filmDiv);
+        top10Container.appendChild(div);
     });
 }
 
@@ -107,14 +108,14 @@ const filmsTable = document.getElementById("filmsTable");
 let films = JSON.parse(localStorage.getItem("films")) || [];
 
 // Affichage des films
-function afficherFilms() {
+function afficherFilms(liste = films) {
     filmsTable.innerHTML = "";
 
-    films.forEach(function (film) {
+    liste.forEach(function (film) {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td><img src="${film.image || 'https://via.placeholder.com/50x75'}" width="50"></td>
+            
             <td>${film.titre}</td>
             <td>${film.genre}</td>
             <td>${film.annee}</td>
@@ -131,59 +132,123 @@ function afficherFilms() {
     });
 }
 
+
 // Ajout d’un film
 filmForm.addEventListener("submit", function (e) {
     e.preventDefault();
-    
+
+    const titre = document.getElementById("titre").value.trim();
     const genre = document.getElementById("genre").value.trim();
     const annee = parseInt(document.getElementById("annee").value);
     const note = parseFloat(document.getElementById("note").value);
     const realisateur = document.getElementById("realisateur").value.trim();
 
-   if (! titre || !genre || !annee || isNaN(note) || !realisateur) {
+    if (!titre || !genre || !annee || isNaN(note) || !realisateur) {
         alert("Tous les champs sont obligatoires");
         return;
     }
-
     if (note < 0 || note > 10) {
         alert("La note doit être comprise entre 0 et 10");
         return;
     }
-    
-    let image = document.getElementById("image") 
-        ? document.getElementById("image").value.trim() 
-        : "https://via.placeholder.com/100x150";
 
-
+    // Fetch de l'image depuis l'API OMDB
     fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(titre)}&apikey=6edec412`)
         .then(res => res.json())
         .then(data => {
-            if (data.Response !== "False" && data.Poster) {
-                image = data.Poster;
-            }
+            // Si l'API renvoie un poster valide, on l'utilise, sinon image par défaut
+            const image = (data.Response !== "False" && data.Poster && data.Poster !== "N/A")
+                ? data.Poster
+                : "https://via.placeholder.com/100x150";
 
-            // Ajouter le film seulement après avoir récupéré l'image
-            films.push({ titre, genre, annee, note, realisateur, image });
+            // Création de l'objet film
+            const film = {
+                titre: titre,
+                genre: genre,
+                annee: annee,
+                note: note,
+                realisateur: realisateur,
+                image: image
+            };
+
+            // Ajout au tableau
+            films.push(film);
             localStorage.setItem("films", JSON.stringify(films));
+
+            // Mise à jour affichage
             afficherFilms();
+            modifierKPI();
             updateFilmsChart();
             updateTop10();
-            modifierKPI();
+
+            // Reset du formulaire
             filmForm.reset();
         })
         .catch(err => {
-            console.log(err);
-            // Ajouter film avec image par défaut si erreur API
-            films.push({ titre, genre, annee, note, realisateur, image });
+            console.error(err);
+            alert("Erreur lors de la récupération de l'image, le film sera ajouté avec une image par défaut.");
+
+            const film = {
+                titre: titre,
+                genre: genre,
+                annee: annee,
+                note: note,
+                realisateur: realisateur,
+                image: "https://via.placeholder.com/100x150"
+            };
+
+            films.push(film);
             localStorage.setItem("films", JSON.stringify(films));
+
             afficherFilms();
+            modifierKPI();
             updateFilmsChart();
             updateTop10();
-            modifierKPI();
+
             filmForm.reset();
         });
-});
+        var sortSelect = document.getElementById("sortSelect");
 
+
+});
+ 
+sortSelect.addEventListener("change", function () {
+  var critere = sortSelect.value;
+
+  if (critere === "titre") {
+    films.sort(function (a, b) {
+      return a.titre.localeCompare(b.titre);
+    });
+  } 
+  else if (critere === "annee") {
+    films.sort(function (a, b) {
+      return a.annee - b.annee;
+    });
+  } 
+  else if (critere === "note") {
+    films.sort(function (a, b) {
+      return b.note - a.note;
+    });
+  }
+
+  afficherFilms(films);
+});
+var searchInput = document.getElementById("searchInput");
+
+function Recherche() {
+  var valeur = searchInput.value.toLowerCase();
+
+  if (valeur === "") {
+    afficherFilms(films);
+    return;
+  }
+
+  var filmsFiltres = films.filter(function (film) {
+    return film.titre && film.titre.toLowerCase().includes(valeur);
+  });
+
+  afficherFilms(filmsFiltres);
+}
 
 /* =========================
    SUPPRESSION D’UN FILM
@@ -229,6 +294,61 @@ function modifierKPI() {
 
 
 /* =========================
+   PARTIE RÉALISATEURS
+========================= */
+
+let realisateurs = [];
+function updateKPI() {      
+    const span = document.getElementById("kpiRealisateurs");
+    if (!span) {
+        console.error("Span KPI introuvable");
+        return;
+    }
+    span.textContent = realisateurs.length;
+}
+
+function addRealisateur(e) {
+    e.preventDefault();
+
+    const input = document.getElementById("nomRealisateur");
+    const nom = input.value.trim();
+    if (!nom) return;
+
+    realisateurs.push(nom);
+    input.value = "";
+
+    afficherRealisateurs();
+    updateKPI();
+}
+updateKPI();
+
+function afficherRealisateurs() {
+    const ul = document.getElementById("listeRealisateurs");
+    ul.innerHTML = "";
+
+    realisateurs.forEach((nom, index) => {
+        const li = document.createElement("li");
+        li.textContent = nom;
+
+        const btn = document.createElement("button");
+        btn.textContent = "Supprimer";
+        btn.classList.add("btn-supprimer");
+
+        btn.addEventListener("click", () => {
+            realisateurs.splice(index, 1);
+            afficherRealisateurs();
+        });
+
+        li.appendChild(btn);
+        ul.appendChild(li);
+    });
+}
+
+
+
+
+
+/* =========================
    API OMDB
 ========================= */
 let ratingChart = null;
@@ -240,7 +360,7 @@ function fetchOMDBStats() {
         return;
     }
 
-    fetch(`https://www.omdbapi.com/?t=${title}&apikey=6edec412`)
+    fetch(`https://www.omdbapi.com/?t=${title}&apikey=6edec412 `)
         .then(res => res.json())
         .then(data => {
             if (data.Response === "False") {
@@ -303,3 +423,31 @@ function clearChart() {
 
 
 updateFilmsChart();
+
+
+
+
+const rechercher = document.getElementById("searchInputtt");
+const rechercherbutton = document.getElementById("buttonSearch");
+console.log(rechercherbutton); 
+
+rechercherbutton.addEventListener("click", function () {
+    const valeur = rechercher.value.toLowerCase().trim();
+
+    // Si c vide on affiche tous les films
+    if (valeur === "") {
+        afficherFilms();
+        return;
+    }
+
+    // Filtrer par titre OU réalisateur
+    const filmsFiltres = films.filter(film =>
+        film.titre.toLowerCase().includes(valeur) ||
+        film.realisateur.toLowerCase().includes(valeur)
+    );
+
+    afficherFilms(filmsFiltres);
+    
+});
+
+

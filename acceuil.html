@@ -12,9 +12,16 @@
 <header>
     <h4 class="logo">CineTech</h4>
     <div class="recherche">
-        <input type="text" placeholder="Rechercher...">
-        <button><i class="fa-solid fa-magnifying-glass"></i></button>
-    </div>
+    <input 
+        type="text" 
+        id="searchInputtt"
+        placeholder="Rechercher par titre ou réalisateur..."
+    >
+    <button id="buttonSearch">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+</div>
+
 </header>
 
 <div class="sidebar"> 
@@ -102,11 +109,7 @@
         <h2>Ajouter / Modifier un Film</h2>
 
         <form class="filmform" id="filmForm">
-            <div class="formgroup">
-                   <label for="image">Image (URL)</label>
-                 <input type="text" id="image" placeholder="Lien image du film">
-              </div>
-
+            
             <div class="formgroup">
                 <label for="titre">Titre</label>
                 <input type="text" id="titre" required>
@@ -156,7 +159,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Image</th>
+                    
                     <th>Titre</th>
                     <th>Genre</th>
                     <th>Année</th>
