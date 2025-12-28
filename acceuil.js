@@ -1,5 +1,5 @@
 /* =========================
-   AFFICHAGE DES SECTIONS
+   AFFICHAGE DES SECTIONS (rim)
 ========================= */
 function showSection(sectionId) {
     const sections = document.querySelectorAll('.section');
@@ -17,7 +17,7 @@ showSection('dashboard');
 
 
 /* c est un graphique dynamique non pas statique comme le code du site chart.js
-   il reflete les donnees entree par nous */
+   il reflete les donnees entree par nous (rim) */
 let filmsChart = null;/**au debut graph vide */
 
 function updateFilmsChart() {
@@ -61,7 +61,7 @@ function updateFilmsChart() {
     });
 }
 
-/**top 10  */
+/**top 10 (rim) */
 function updateTop10() {
     const top10Container = document.getElementById("top10List");
     top10Container.innerHTML = "";
@@ -122,12 +122,15 @@ function afficherFilms(liste = films) {
             <td>${film.note}</td>
             <td>${film.realisateur}</td>
             <td><button class="btn-delete">Supprimer</button></td>
+            <td><button class="btn-edit">Modifier</button></td>
         `;
 
         row.querySelector(".btn-delete").addEventListener("click", function () {
             supprimerFilm(film.titre);
         });
-
+        row.querySelector(".btn-edit").addEventListener("click", function () {
+         modifierFilm(film);
+        });
         filmsTable.appendChild(row);
     });
 }
@@ -152,7 +155,7 @@ filmForm.addEventListener("submit", function (e) {
         return;
     }
 
-    // Fetch de l'image depuis l'API OMDB
+    // Fetch de l'image depuis l'API OMDB (rim)
     fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(titre)}&apikey=6edec412`)
         .then(res => res.json())
         .then(data => {
@@ -266,10 +269,23 @@ function supprimerFilm(titre) {
 afficherFilms();
 modifierKPI();
 updateFilmsChart();
+/*==================
+modification
+===================*/
+function modifierFilm(film) {
+    filmEnCours = film;
 
+    document.getElementById("titre").value = film.titre;
+    document.getElementById("genre").value = film.genre;
+    document.getElementById("annee").value = film.annee;
+    document.getElementById("note").value = film.note;
+    document.getElementById("realisateur").value = film.realisateur;
+
+    document.querySelector(".btn-save").textContent = "Modifier";
+}
 
 /* =========================
-   KPI
+   KPI DASHBOARD (rim)
 ========================= */
 function modifierKPI() {
     const totalFilms = films.length;
@@ -426,7 +442,7 @@ updateFilmsChart();
 
 
 
-
+/** buton recherche (rim) */
 const rechercher = document.getElementById("searchInputtt");
 const rechercherbutton = document.getElementById("buttonSearch");
 console.log(rechercherbutton); 
