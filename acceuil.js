@@ -1,3 +1,14 @@
+/**du side bar active pour qu elle s ouvre */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.querySelector(".sidebar");
+
+menuBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("active");
+});
+
+
+
 /* =========================
    AFFICHAGE DES SECTIONS (rim)
 ========================= */

@@ -10,17 +10,21 @@
 <body>
 
 <header>
-    <h4 class="logo">CineTech</h4>
+    
+    <div class="nav-left">
+        <button id="menuBtn">
+        <i class="fa-solid fa-align-justify"></i>
+    </button>
+    </div>
+    <h1 class="logo">CineTech</h1>
     <div class="recherche">
-    <input 
-        type="text" 
-        id="searchInputtt"
-        placeholder="Rechercher par titre ou réalisateur..."
-    >
+    <input type="text"  placeholder="Rechercher par titre ou réalisateur...">
     <button id="buttonSearch">
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
 </div>
+   
+   
 
 </header>
 
@@ -34,6 +38,7 @@
 </div>
 
 <!-- DASHBOARD -->
+ <div class="main">
 <div id="dashboard" class="section">
 
     <div class="row">
@@ -95,6 +100,7 @@
     </div>
 
 </div>
+
 
 <!-- MODULE 1 -->
 <div id="module1" class="section">
@@ -208,7 +214,7 @@
         <canvas id="ratingChart"></canvas>
     </div>
 </div>
-
+ </div>
 
 
 

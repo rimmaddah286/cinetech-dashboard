@@ -12,59 +12,125 @@ body {
 /* =========================
    HEADER
 ========================= */
+
+
+/* HEADER */
 header {
-    background-color: rgb(148, 148, 239);
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50px;
-    z-index: 1000;
+  background-color: #b90b11;
+  color: white;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0 20px;
 }
 
+/* Bouton menu ☰ */
+#menuBtn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
 
-/* =========================
-   SIDEBAR
-========================= */
+/* Logo centré */
+.logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  margin: 0;
+}
+
+/* Recherche à droite */
+.recherche {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recherche input {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+}
+
+.recherche button {
+  height: 28px;
+  background: white;
+  border: none;
+  padding: 0 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* SIDEBAR */
 .sidebar {
-    width: 220px;
-    background: #1e1e2f;
-    min-height: 100vh;
-    color: white;
-    padding: 20px 10px;
-    position: fixed;
-    top: 50px; /* sous le header */
-    left: 0;
-    bottom: 0;
-    z-index: 999;
+  width: 0;
+  background-color: #1c1c1c;
+  color: white;
+  position: fixed;
+  top: 60px; /* sous le header */
+  bottom: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  z-index: 999;
+  padding-top: 20px;
+}
+
+.sidebar.active {
+  width: 200px;
 }
 
 .sidebar ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .sidebar li {
-    padding: 15px;
-    cursor: pointer;
+  padding: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.sidebar.active li {
+  opacity: 1;
 }
 
 .sidebar li:hover {
-    background: #333;
+  background-color: #333;
+}
+/* CONTENU PRINCIPAL */
+.main {
+  margin-top: 60px; /* pour laisser la place du header */
+  padding: 20px;
+  transition: margin-left 0.3s;
 }
 
+/* Décalage du contenu quand sidebar active */
+.sidebar.active ~ .main {
+  margin-left: 200px;
+}
 
 /* =========================
    SECTIONS
 ========================= */
 .section {
     display: none;
-    margin-left: 240px; /* espace pour la sidebar */
-    margin-top: 80px;   /* espace pour le header */
+    margin-top: 30px;   /* espace pour le header */
     padding: 20px;
 }
 
@@ -236,10 +302,12 @@ table td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
     text-align: left;
+    
 }
 
 table th {
     background-color: #f1f3f5;
+    
 }
 
 .btn-delete {
